@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teleportation-Based Quantum Key Distribution (QKD) Variants</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8fafc;
+            min-height: 100vh;
+            color: #1e293b;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: #1e293b;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .control-panel {
+            background: #ffffff;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .results-panel {
+            background: #ffffff;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .protocol-info {
+            background: #ffffff;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        select, input[type="number"], input[type="checkbox"], input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #d1d5db;
+            background: #ffffff;
+            color: #1e293b;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease, background 0.3s ease;
+        }
+
+        select:focus, input[type="number"]:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            transform: scale(1.2);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #1d4ed8 0%, #7c3aed 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(124, 58, 237, 0.35);
+            filter: brightness(1.05);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #0ea5e9 0%, #22c55e 100%);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #60a5fa;
+            font-weight: 600;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #111827;
+            border-top: 4px solid #60a5fa;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .results {
+            display: none;
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        .result-section {
+            margin-bottom: 25px;
+            padding: 20px;
+            border-radius: 10px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+        }
+
+        .result-section h3 {
+            margin-bottom: 15px;
+            color: #1e293b;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+        }
+
+        .key-display {
+            font-family: 'Courier New', monospace;
+            background: #1e293b;
+            color: #34d399;
+            padding: 15px;
+            border-radius: 8px;
+            word-break: break-all;
+            margin: 10px 0;
+            border: 1px solid #374151;
+        }
+
+        .circuit-display {
+            font-family: 'Courier New', monospace;
+            background: #1e293b;
+            color: #e5e7eb;
+            padding: 15px;
+            border-radius: 8px;
+            overflow: auto;
+            white-space: pre;
+            border: 1px solid #374151;
+        }
+
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-align: center;
+            margin: 15px 0;
+        }
+
+        .status.secure {
+            background: rgba(34, 197, 94, 0.15);
+            color: #22c55e;
+            border: 1px solid rgba(34, 197, 94, 0.35);
+        }
+
+        .status.compromised {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.35);
+        }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .metric-card {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid #e2e8f0;
+            transition: border-color 0.3s ease;
+        }
+
+        .metric-card:hover {
+            border-color: #3b82f6;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #1d4ed8;
+            margin-bottom: 5px;
+        }
+
+        .metric-label {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .protocol-description {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .protocol-description h4 {
+            color: #1d4ed8;
+            margin-bottom: 10px;
+        }
+
+        .comparison-results {
+            display: none;
+        }
+
+        .comparison-results.show {
+            display: block;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #1f2937;
+        }
+
+        .comparison-table th {
+            background: #f8fafc;
+            color: #1d4ed8;
+            font-weight: 600;
+        }
+
+        .comparison-table tr:hover {
+            background: #f1f5f9;
+        }
+
+        .security-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .security-high {
+            background: rgba(34, 197, 94, 0.15);
+            color: #22c55e;
+        }
+
+        .security-medium {
+            background: rgba(234, 179, 8, 0.15);
+            color: #eab308;
+        }
+
+        .security-low {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .metrics {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌌 Quantum Key Distribution (QKD) Variants</h1>
+            <p>Explore different teleportation-based quantum key distribution protocols</p>
+        </div>
+
+        <div class="protocol-info">
+            <h2>🔬 Available QKD Protocols</h2>
+            <div class="protocol-description">
+                <h4>BB84 Protocol</h4>
+                <p>The first practical quantum key distribution protocol using photon polarization states in rectilinear and diagonal bases.</p>
+            </div>
+            <div class="protocol-description">
+                <h4>E91 Protocol</h4>
+                <p>Entanglement-based QKD protocol using Bell states for secure key distribution with quantum entanglement.</p>
+            </div>
+            <div class="protocol-description">
+                <h4>BBM92 Protocol</h4>
+                <p>Bell state measurement based QKD protocol that leverages quantum correlations for secure communication.</p>
+            </div>
+            <div class="protocol-description">
+                <h4>Teleportation QKD</h4>
+                <p>Quantum key distribution using quantum teleportation protocol with shared entangled states.</p>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="control-panel">
+                <h2>⚙️ Simulation Controls</h2>
+                
+                <form id="qkd-form">
+                    <div class="form-group">
+                        <label for="protocol">Select QKD Protocol:</label>
+                        <select id="protocol" name="protocol">
+                            <option value="bb84">BB84 Protocol</option>
+                            <option value="e91">E91 Protocol</option>
+                            <option value="bbm92">BBM92 Protocol</option>
+                            <option value="teleportation">Teleportation QKD</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="key-length">Key Length (bits):</label>
+                        <input type="number" id="key-length" name="key-length" value="20" min="1" max="100">
+                    </div>
+
+                    <div class="form-group">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="use-custom-bits" name="use-custom-bits">
+                            <label for="use-custom-bits">Use Custom Bits (instead of auto-generated)</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="custom-bits-group" style="display: none;">
+                        <label for="custom-bits">Enter your bits (0s and 1s only):</label>
+                        <input type="text" id="custom-bits" name="custom-bits" placeholder="e.g., 1010101010" pattern="[01]*">
+                        <small style="color: #64748b; font-size: 0.9rem;">Enter only 0s and 1s. The system will use these bits for key generation.</small>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="eavesdropping" name="eavesdropping">
+                            <label for="eavesdropping">Simulate Eavesdropping (Eve's Attack)</label>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn">🚀 Run QKD Simulation</button>
+                </form>
+
+                <button type="button" id="compare-btn" class="btn btn-secondary">📊 Compare All Protocols</button>
+                <button type="button" id="circuit-btn" class="btn btn-secondary">🔎 Show Circuit</button>
+            </div>
+
+            <div class="results-panel">
+                <h2>📈 Simulation Results</h2>
+                
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Running quantum simulation...</p>
+                </div>
+
+                <div class="results" id="results">
+                    <div class="result-section">
+                        <h3>🔑 Generated Keys</h3>
+                        <div>
+                            <strong>Alice's Key:</strong>
+                            <div class="key-display" id="alice-key"></div>
+                        </div>
+                        <div>
+                            <strong>Bob's Key:</strong>
+                            <div class="key-display" id="bob-key"></div>
+                        </div>
+                    </div>
+
+                    <div class="result-section">
+                        <h3>📊 Security Metrics</h3>
+                        <div class="metrics">
+                            <div class="metric-card">
+                                <div class="metric-value" id="agreement-rate">-</div>
+                                <div class="metric-label">Agreement Rate</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-value" id="qber">-</div>
+                                <div class="metric-label">QBER</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-value" id="key-length-result">-</div>
+                                <div class="metric-label">Key Length</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-value" id="security-level">-</div>
+                                <div class="metric-label">Security Level</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="result-section">
+                        <h3>🛡️ Security Status</h3>
+                        <div class="status" id="security-status">
+                            <p id="status-text">Run simulation to see security status</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="comparison-results" id="comparison-results">
+                    <h3>📊 Protocol Comparison</h3>
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Protocol</th>
+                                <th>Agreement Rate</th>
+                                <th>QBER</th>
+                                <th>Security Level</th>
+                                <th>Key Length</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="comparison-table-body">
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="result-section" id="circuit-section" style="display:none;">
+                    <h3>🧪 Circuit Diagram</h3>
+                    <pre class="circuit-display" id="circuit-diagram"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('qkd-form');
+            const compareBtn = document.getElementById('compare-btn');
+            const circuitBtn = document.getElementById('circuit-btn');
+            const loading = document.getElementById('loading');
+            const results = document.getElementById('results');
+            const comparisonResults = document.getElementById('comparison-results');
+            const circuitSection = document.getElementById('circuit-section');
+            const circuitDiagram = document.getElementById('circuit-diagram');
+            const useCustomBitsCheckbox = document.getElementById('use-custom-bits');
+            const customBitsGroup = document.getElementById('custom-bits-group');
+            const customBitsInput = document.getElementById('custom-bits');
+
+            // Toggle custom bits input visibility
+            useCustomBitsCheckbox.addEventListener('change', function() {
+                if (this.checked) {
+                    customBitsGroup.style.display = 'block';
+                } else {
+                    customBitsGroup.style.display = 'none';
+                    customBitsInput.value = '';
+                }
+            });
+
+            // Validate custom bits input
+            customBitsInput.addEventListener('input', function() {
+                const value = this.value;
+                const isValid = /^[01]*$/.test(value);
+                
+                if (value && !isValid) {
+                    this.style.borderColor = '#ef4444';
+                    this.setCustomValidity('Please enter only 0s and 1s');
+                } else {
+                    this.style.borderColor = '#d1d5db';
+                    this.setCustomValidity('');
+                }
+            });
+
+            form.addEventListener('submit', async function(event) {
+                event.preventDefault();
+                
+                const protocol = document.getElementById('protocol').value;
+                const keyLength = document.getElementById('key-length').value;
+                const eavesdropping = document.getElementById('eavesdropping').checked;
+                const useCustomBits = document.getElementById('use-custom-bits').checked;
+                const customBits = document.getElementById('custom-bits').value;
+
+                // Validate custom bits if enabled
+                if (useCustomBits) {
+                    if (!customBits) {
+                        alert('Please enter custom bits when the option is enabled.');
+                        return;
+                    }
+                    if (!/^[01]+$/.test(customBits)) {
+                        alert('Custom bits must contain only 0s and 1s.');
+                        return;
+                    }
+                    if (customBits.length < parseInt(keyLength)) {
+                        alert(`Custom bits must be at least ${keyLength} characters long.`);
+                        return;
+                    }
+                }
+
+                await runSimulation(protocol, keyLength, eavesdropping, useCustomBits, customBits);
+            });
+
+            compareBtn.addEventListener('click', async function() {
+                const keyLength = document.getElementById('key-length').value;
+                const eavesdropping = document.getElementById('eavesdropping').checked;
+                const useCustomBits = document.getElementById('use-custom-bits').checked;
+                const customBits = document.getElementById('custom-bits').value;
+
+                // Validate custom bits if enabled
+                if (useCustomBits) {
+                    if (!customBits) {
+                        alert('Please enter custom bits when the option is enabled.');
+                        return;
+                    }
+                    if (!/^[01]+$/.test(customBits)) {
+                        alert('Custom bits must contain only 0s and 1s.');
+                        return;
+                    }
+                    if (customBits.length < parseInt(keyLength)) {
+                        alert(`Custom bits must be at least ${keyLength} characters long.`);
+                        return;
+                    }
+                }
+
+                await compareProtocols(keyLength, eavesdropping, useCustomBits, customBits);
+            });
+
+            circuitBtn.addEventListener('click', async function() {
+                const protocol = document.getElementById('protocol').value;
+                await showCircuit(protocol);
+            });
+
+            async function runSimulation(protocol, keyLength, eavesdropping, useCustomBits = false, customBits = '') {
+                showLoading();
+                hideResults();
+
+                try {
+                    const requestBody = {
+                        protocol: protocol,
+                        key_length: parseInt(keyLength),
+                        eavesdropping: eavesdropping
+                    };
+
+                    if (useCustomBits && customBits) {
+                        requestBody.use_custom_bits = true;
+                        requestBody.custom_bits = customBits;
+                    }
+
+                    const response = await fetch('/run_simulation', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(requestBody)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    displayResults(data);
+                } catch (error) {
+                    console.error('Error running simulation:', error);
+                    showError('An error occurred while running the simulation.');
+                }
+            }
+
+            async function compareProtocols(keyLength, eavesdropping, useCustomBits = false, customBits = '') {
+                showLoading();
+                hideResults();
+
+                try {
+                    const requestBody = {
+                        key_length: parseInt(keyLength),
+                        eavesdropping: eavesdropping
+                    };
+
+                    if (useCustomBits && customBits) {
+                        requestBody.use_custom_bits = true;
+                        requestBody.custom_bits = customBits;
+                    }
+
+                    const response = await fetch('/compare_protocols', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(requestBody)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    displayComparison(data);
+                } catch (error) {
+                    console.error('Error comparing protocols:', error);
+                    showError('An error occurred while comparing protocols.');
+                }
+            }
+
+            function showLoading() {
+                loading.classList.add('show');
+                results.classList.remove('show');
+                comparisonResults.classList.remove('show');
+                circuitSection.style.display = 'none';
+            }
+
+            function hideResults() {
+                results.classList.remove('show');
+                comparisonResults.classList.remove('show');
+                circuitSection.style.display = 'none';
+            }
+
+            function displayResults(data) {
+                loading.classList.remove('show');
+                results.classList.add('show');
+                comparisonResults.classList.remove('show');
+
+                // Display keys
+                document.getElementById('alice-key').textContent = data.alice_key.join('');
+                document.getElementById('bob-key').textContent = data.bob_key.join('');
+
+                // Display metrics
+                document.getElementById('agreement-rate').textContent = data.agreement_rate;
+                document.getElementById('qber').textContent = data.qber;
+                document.getElementById('key-length-result').textContent = data.key_length;
+                document.getElementById('security-level').textContent = data.security_level;
+
+                // Display security status
+                const statusDiv = document.getElementById('security-status');
+                const statusText = document.getElementById('status-text');
+                
+                statusText.textContent = data.status;
+                
+                if (data.is_secure) {
+                    statusDiv.className = 'status secure';
+                } else {
+                    statusDiv.className = 'status compromised';
+                }
+            }
+
+            function displayComparison(data) {
+                loading.classList.remove('show');
+                results.classList.remove('show');
+                comparisonResults.classList.add('show');
+
+                const tbody = document.getElementById('comparison-table-body');
+                tbody.innerHTML = '';
+
+                for (const [protocolKey, protocolData] of Object.entries(data)) {
+                    if (protocolData.error) {
+                        continue;
+                    }
+
+                    const row = document.createElement('tr');
+                    
+                    const securityBadgeClass = protocolData.security_level.toLowerCase().replace(' ', '-');
+                    
+                    row.innerHTML = `
+                        <td><strong>${protocolData.name}</strong></td>
+                        <td>${protocolData.agreement_rate}</td>
+                        <td>${protocolData.qber}</td>
+                        <td><span class="security-badge security-${securityBadgeClass}">${protocolData.security_level}</span></td>
+                        <td>${protocolData.key_length}</td>
+                        <td>${protocolData.is_secure ? '✅ Secure' : '❌ Compromised'}</td>
+                    `;
+                    
+                    tbody.appendChild(row);
+                }
+            }
+
+            async function showCircuit(protocol) {
+                showLoading();
+                try {
+                    const keyLength = document.getElementById('key-length').value;
+                    const response = await fetch(`/protocol_circuit?protocol=${encodeURIComponent(protocol)}&key_length=${encodeURIComponent(keyLength)}`);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const data = await response.json();
+                    loading.classList.remove('show');
+                    circuitSection.style.display = 'block';
+                    circuitDiagram.textContent = data.circuit || 'No circuit available.';
+                } catch (error) {
+                    console.error('Error fetching circuit:', error);
+                    loading.classList.remove('show');
+                    circuitSection.style.display = 'block';
+                    circuitDiagram.textContent = 'An error occurred while fetching the circuit diagram.';
+                }
+            }
+
+            function showError(message) {
+                loading.classList.remove('show');
+                results.classList.add('show');
+                
+                document.getElementById('status-text').textContent = message;
+                document.getElementById('security-status').className = 'status compromised';
+            }
+        });
+    </script>
+</body>
+</html>
